@@ -1,10 +1,10 @@
 Hi there!
 
-Author：Akpigs-最菜那个（原创）
-Version：0.0.0.1
-Date：2023-7-18
-Langeuage：Python
-Description：This is a file search tool as like Find in Files.
+- Author：Akpigs-最菜那个（原创）
+- Version：0.0.0.1
+- Date：2023-7-18
+- Langeuage：Python
+- Description：This is a file search tool as like Find in Files.
 
 
 How to use Find in Files?
