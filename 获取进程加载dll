@@ -1,0 +1,82 @@
+import sys
+import psutil
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
+                             QTableWidget, QTableWidgetItem, QLabel, QHeaderView, QMessageBox)
+
+class DLLViewer(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('DLL Viewer')
+        self.layout = QVBoxLayout()
+        self.pidLayout = QHBoxLayout()
+        self.pidInput = QLineEdit(self)
+        self.pidInput.setPlaceholderText('Enter PID')
+        self.pidLayout.addWidget(QLabel('PID:'))
+        self.pidLayout.addWidget(self.pidInput)
+        self.viewButton = QPushButton('View DLLs', self)
+        self.viewButton.clicked.connect(self.onViewButtonClick)
+        self.pidLayout.addWidget(self.viewButton)
+        self.layout.addLayout(self.pidLayout)
+        self.searchLayout = QHBoxLayout()
+        self.searchInput = QLineEdit(self)
+        self.searchInput.setPlaceholderText('Enter DLL name to search')
+        self.searchInput.returnPressed.connect(self.onSearchButtonClick)
+        self.searchLayout.addWidget(self.searchInput)
+        self.searchButton = QPushButton('Search', self)
+        self.searchButton.clicked.connect(self.onSearchButtonClick)
+        self.searchLayout.addWidget(self.searchButton)
+        self.layout.addLayout(self.searchLayout)
+        self.dllTable = QTableWidget(self)
+        self.dllTable.setColumnCount(2)
+        self.dllTable.setHorizontalHeaderLabels(['Name', 'Path'])
+        self.dllTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.layout.addWidget(self.dllTable)
+        self.setLayout(self.layout)
+        self.resize(600, 400)
+
+    def onViewButtonClick(self):
+        pid = self.pidInput.text()
+        if pid.isdigit():
+            self.updateDLLTable(int(pid))
+        else:
+            QMessageBox.warning(self, 'Error', 'Please enter a valid PID.')
+
+    def updateDLLTable(self, pid):
+        try:
+            process = psutil.Process(pid)
+            self.dllTable.setRowCount(0)
+            for dll in process.memory_maps():
+                rowCount = self.dllTable.rowCount()
+                self.dllTable.insertRow(rowCount)
+                self.dllTable.setItem(rowCount, 0, QTableWidgetItem(dll.path.split('\\')[-1]))
+                self.dllTable.setItem(rowCount, 1, QTableWidgetItem(dll.path))
+        except psutil.NoSuchProcess:
+            QMessageBox.warning(self, 'Error', f'No process with PID {pid}')
+        except Exception as e:
+            QMessageBox.warning(self, 'Error', f'Error: {e}')
+
+    def onSearchButtonClick(self):
+        search_text = self.searchInput.text().lower()
+        self.searchInput.clear()
+        found = False
+        for row in range(self.dllTable.rowCount()):
+            item = self.dllTable.item(row, 0)
+            if search_text in item.text().lower():
+                self.dllTable.selectRow(row)
+                self.dllTable.scrollToItem(item)
+                found = True
+                break
+        if not found:
+            QMessageBox.information(self, 'Search', 'DLL not found.')
+
+def main():
+    app = QApplication(sys.argv)
+    ex = DLLViewer()
+    ex.show()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
