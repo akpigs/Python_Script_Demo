@@ -1,0 +1,47 @@
+import winreg as reg
+
+def disable_task_manager():
+    key_path = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
+    key = None  # 初始化key为None
+    try:
+        # 直接打开键，如果键不存在则创建它
+        key = reg.CreateKey(reg.HKEY_CURRENT_USER, key_path)
+        # 设置值以禁用任务管理器
+        reg.SetValueEx(key, "DisableTaskMgr", 0, reg.REG_DWORD, 1)
+        print("任务管理器已被禁用。")
+    except PermissionError:
+        print("权限错误：需要管理员权限来执行此操作。")
+    finally:
+        if key:  # 确保key不是None
+            reg.CloseKey(key)
+
+if __name__ == "__main__":
+    disable_task_manager()
+
+
+
+# 启用任务管理器
+'''
+import winreg as reg
+
+def enable_task_manager():
+    key_path = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
+    try:
+        # 尝试打开键以写入
+        key = reg.OpenKey(reg.HKEY_CURRENT_USER, key_path, 0, reg.KEY_WRITE)
+        # 尝试删除值以启用任务管理器
+        reg.DeleteValue(key, "DisableTaskMgr")
+        print("任务管理器已被启用。")
+    except FileNotFoundError:
+        print("找不到设置，任务管理器可能已经是启用状态。")
+    except PermissionError:
+        print("权限错误：需要管理员权限来执行此操作。")
+    except OSError:
+        print("可能已经删除了值，任务管理器没有被禁用。")
+    finally:
+        if 'key' in locals():
+            reg.CloseKey(key)
+
+if __name__ == "__main__":
+    enable_task_manager()
+'''
