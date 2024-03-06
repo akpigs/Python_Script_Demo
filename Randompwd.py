@@ -5,6 +5,72 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QCheckBox, QLine
 class PasswordGenerator(QWidget):
     def __init__(self):
         super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('密码生成器')
+        self.layout = QVBoxLayout()
+        self.uppercaseCheckBox = QCheckBox('A-Z')
+        self.lowercaseCheckBox = QCheckBox('a-z')
+        self.specialCharsCheckBox = QCheckBox('~!@#$%^&*()_-+={};:\'",./|?><`')
+        self.numbersCheckBox = QCheckBox('0-9')
+        self.passwordLengthInput = QLineEdit()
+        self.passwordLengthInput.setPlaceholderText('密码长度')
+        self.numberOfPasswordsComboBox = QComboBox()
+        self.numberOfPasswordsComboBox.addItems([str(i) for i in range(1, 100)])
+        self.generateButton = QPushButton('生成密码')
+        self.generateButton.clicked.connect(self.generatePasswords)
+        self.resultTextEdit = QTextEdit()
+        self.resultTextEdit.setReadOnly(True)
+        self.layout.addWidget(self.uppercaseCheckBox)
+        self.layout.addWidget(self.lowercaseCheckBox)
+        self.layout.addWidget(self.specialCharsCheckBox)
+        self.layout.addWidget(self.numbersCheckBox)
+        self.layout.addWidget(self.passwordLengthInput)
+        self.layout.addWidget(self.numberOfPasswordsComboBox)
+        self.layout.addWidget(self.generateButton)
+        self.layout.addWidget(self.resultTextEdit)
+        self.setLayout(self.layout)
+
+    def generatePasswords(self):
+        characters = ''
+        if self.uppercaseCheckBox.isChecked():
+            characters += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        if self.lowercaseCheckBox.isChecked():
+            characters += 'abcdefghijklmnopqrstuvwxyz'
+        if self.specialCharsCheckBox.isChecked():
+            characters += '~!@#$%^&*()_-+={};:\'",./|?><`'
+        if self.numbersCheckBox.isChecked():
+            characters += '0123456789'
+        if not characters or not self.passwordLengthInput.text().isdigit():
+            self.resultTextEdit.setText("无法生成密码，请选择至少一种字符类型并输入有效的密码长度。")
+            return
+        passwordLength = int(self.passwordLengthInput.text())
+        if passwordLength <= 0:
+            self.resultTextEdit.setText("密码长度必须大于0。")
+            return
+        numberOfPasswords = int(self.numberOfPasswordsComboBox.currentText())
+        passwords = ''
+        for _ in range(numberOfPasswords):
+            password = ''.join(random.choice(characters) for _ in range(passwordLength))
+            passwords += password + '\n'
+
+        self.resultTextEdit.setText(passwords)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = PasswordGenerator()
+    ex.show()
+    sys.exit(app.exec_())
+
+'''
+import sys
+import random
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QCheckBox, QLineEdit, QPushButton, QComboBox, QTextEdit
+
+class PasswordGenerator(QWidget):
+    def __init__(self):
+        super().__init__()
         self.setup_ui()
 
     def setup_ui(self):
@@ -68,8 +134,10 @@ class PasswordGenerator(QWidget):
         return '\n'.join(''.join(random.choice(characters) for _ in range(password_length))
                          for _ in range(number_of_passwords))
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = PasswordGenerator()
     ex.show()
     sys.exit(app.exec_())
+'''
