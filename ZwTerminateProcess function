@@ -1,0 +1,27 @@
+import ctypes
+from ctypes import wintypes
+
+ntdll = ctypes.WinDLL('ntdll')
+ntdll.ZwTerminateProcess.argtypes = [wintypes.HANDLE, ctypes.c_ulong]
+ntdll.ZwTerminateProcess.restype = ctypes.c_ulong
+
+PROCESS_TERMINATE = 0x0001
+PROCESS_ALL_ACCESS = 0x001F0FFF
+pid = 8696
+
+OpenProcess = ctypes.windll.kernel32.OpenProcess
+OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+OpenProcess.restype = wintypes.HANDLE
+
+process_handle = OpenProcess(PROCESS_TERMINATE, False, pid)
+
+if process_handle:
+    # 调用 ZwTerminateProcess
+    status = ntdll.ZwTerminateProcess(process_handle, 0)
+    ctypes.windll.kernel32.CloseHandle(process_handle)
+    if status == 0:
+        print("进程已成功终止")
+    else:
+        print(f"终止进程失败，错误代码: {status}")
+else:
+    print("无法打开进程")
